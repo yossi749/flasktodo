@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  app:
+    image: flask_app:latest
+    container_name: flask_app
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: flask_mysql
+      DB_NAME: flask
+      DB_USER: flask
+      DB_PASSWORD: password
+    depends_on:
+      - mysql
+    ports:
+      - "5000:5000"
+
+  mysql:
+    container_name: flask_mysql
+    image: mysql:latest
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: flask
+      MYSQL_USER: flask
+      MYSQL_PASSWORD: password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: flask_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: flask_mysql
+      PMA_USER: flask
+      PMA_PASSWORD: password
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
+    driver: local
+
+
+
